@@ -16,6 +16,8 @@ from models.lcf_bert import LCF_BERT
 
 from transformers import BertModel
 
+import stanfordnlp
+
 class Inferer:
 
     def __init__(self, opt):
@@ -139,11 +141,14 @@ def extract(classifier, review):
     predictions = []
     for sentence in tqdm(sentences,desc="Extract software requirements candidates"):
       sent=sentence.strip()
+    
+      document = client.annotate(sent)
+        
       results = get_iob(classifier,sent)
       requirements_candidates = []
       for item in results:
         if item[1]['iob']!=-1: requirements_candidates.append(item[0])
-      predictions.append([sent,requirements_candidates,results])
+      predictions.append([sent,requirements_candidates,results, document.sentence[0].token.pos])
 
     features_extracted=list()
     for predict in predictions:
@@ -156,8 +161,9 @@ def extract(classifier, review):
 
           if iob!=-1 and iobAnt==-1:
             featu.append(token)
-          elif iob!=-1 and iobAnt!=-1:
+          #elif iob!=-1 and iobAnt!=-1:
             #print(len(featu)-1, featu)
+          elif (iob!=-1 or pos == 'DT') and iobAnt!=-1:
             featu[len(featu)-1]= featu[len(featu)-1] +' '+token
           iobAnt=iob
         features_extracted.append((';'.join(featu)))
