@@ -15,6 +15,16 @@ from models.lcf_bert import LCF_BERT
 
 from transformers import BertModel
 
+# POS tagger
+
+import stanfordnlp
+import os
+os.environ["CORENLP_HOME"] = "./corenlp"
+# Import client module
+from stanfordnlp.server import CoreNLPClient
+
+client = CoreNLPClient(annotators=['tokenize','ssplit', 'pos', 'lemma', 'ner'], memory='4G', endpoint='http://localhost:9001')
+
 class Inferer:
 
     def __init__(self, opt):
@@ -196,25 +206,26 @@ def main():
     predict_data = []
     for sentence in tqdm(test_data,desc="Extract software requirements candidates"):
       sent=sentence.strip()
+      document = client.annotate(sent)
       results = get_iob(classifier,sent)
       requirements_candidates = []
       for item in results:
         if item[1]['iob']!=-1: requirements_candidates.append(item[0])
-      predict_data.append([sent,requirements_candidates,results])
+      predict_data.append([sent,requirements_candidates,results, document.sentence[0].sent.token.pos])
     
     
     features_extracted=list()
     for predict in predict_data:
         iobAnt=-1
         featu=list()
-        for p in predict[2]:
+        for p, pos in predict[2], predict[3]:
           #o,b,i=p[1]['confidences']
           token=p[0]
           iob=p[1]['iob']
 
           if iob!=-1 and iobAnt==-1:
             featu.append(token)
-          elif iob!=-1 and iobAnt!=-1:
+          elif (iob!=-1 or pos == 'DT') and iobAnt!=-1:
             #print(len(featu)-1, featu)
             featu[len(featu)-1]= featu[len(featu)-1] +' '+token
           iobAnt=iob
@@ -226,6 +237,8 @@ def main():
     f.close()
     
     print('Extracted software requirements --> '+opt.output_file)
+    
+    client.stop()
 
 
 if __name__ == '__main__':
