@@ -22,6 +22,7 @@ import os
 os.environ["CORENLP_HOME"] = "./corenlp"
 # Import client module
 from stanfordnlp.server import CoreNLPClient
+client.start()
 
 client = CoreNLPClient(annotators=['tokenize','ssplit', 'pos', 'lemma', 'ner'], memory='4G', endpoint='http://localhost:9001')
 
