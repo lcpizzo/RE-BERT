@@ -230,7 +230,7 @@ def main():
 
           if iob!=-1 and iobAnt==-1:
             featu.append(token)
-          elif (iob!=-1 or w.pos == 'DT') and iobAnt!=-1:
+          elif (iob!=-1 or w.pos == 'DT' or w.pos == 'TO') and iobAnt!=-1:
           #elif iob!=-1 and iobAnt!=-1:
             #print(len(featu)-1, featu)
             featu[len(featu)-1]= featu[len(featu)-1] +' '+token
