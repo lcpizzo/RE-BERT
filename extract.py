@@ -214,27 +214,27 @@ def main():
       requirements_candidates = []
       for item in results:
         if item[1]['iob']!=-1: requirements_candidates.append(item[0])
-      #predict_data.append([sent,requirements_candidates,results, document.sentence[0].token])
-      predict_data.append([sent,requirements_candidates,results])
+      predict_data.append([sent,requirements_candidates,results, document.sentence[0].token])
+      #predict_data.append([sent,requirements_candidates,results])
     
     
     features_extracted=list()
     for predict in predict_data:
         iobAnt=-1
         featu=list()
-        #for (p, w) in zip(predict[2], predict[3]):
-        for p in predict[2]:
+        for (p, w) in zip(predict[2], predict[3]):
+        #for p in predict[2]:
           #o,b,i=p[1]['confidences']
           token=p[0]
           iob=p[1]['iob']
 
           if iob!=-1 and iobAnt==-1:
             featu.append(token)
-          #elif (iob!=-1 or w.pos == 'DT') and iobAnt!=-1:
-          elif iob!=-1 and iobAnt!=-1:
+          elif (iob!=-1 or w.pos == 'DT') and iobAnt!=-1:
+          #elif iob!=-1 and iobAnt!=-1:
             #print(len(featu)-1, featu)
             featu[len(featu)-1]= featu[len(featu)-1] +' '+token
-            #iob = 1
+            iob = 1
           iobAnt=iob
         features_extracted.append((';'.join(featu)))
 
