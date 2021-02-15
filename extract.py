@@ -212,7 +212,7 @@ def main():
       requirements_candidates = []
       for item in results:
         if item[1]['iob']!=-1: requirements_candidates.append(item[0])
-      predict_data.append([sent,requirements_candidates,results, document.sentence[0].sent.token])
+      predict_data.append([sent,requirements_candidates,results, document.sentence[0].token])
     
     
     features_extracted=list()
