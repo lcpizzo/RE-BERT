@@ -216,7 +216,7 @@ def main():
       #predict_data.append([sent,requirements_candidates,results])
     
     dist_limit = 3
-    rules = ('IN', 'TO', 'DT', 'VGB', 'PRP$', 'RP', 'RB', 'PDT', 'JJ')
+    rules = ('IN', 'TO', 'DT', 'VGB', 'PRP$', 'RP', 'RB', 'PDT')
     features_extracted=list()
     for predict in predict_data:
         iobAnt=-1
@@ -238,7 +238,7 @@ def main():
             elif iob != -1 and iobAnt!=-1:
                 featu[len(featu)-1]= featu[len(featu)-1] +' '+token
                 iob = 1
-            elif w.pos in rules and dist <= dist_limit and (iobAnt != -1 or buff):
+            elif dist <= dist_limit and (iobAnt != -1 or buff):
                 dist += 1
                 buff += ' ' + token
             else:
