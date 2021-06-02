@@ -26,8 +26,6 @@ from stanfordnlp.server import CoreNLPClient
 client = CoreNLPClient(annotators=['tokenize','ssplit', 'pos', 'lemma', 'ner'], memory='4G', endpoint='http://localhost:9001')
 client.start()
 
-#
-
 class Inferer:
 
     def __init__(self, opt):
@@ -217,25 +215,37 @@ def main():
       predict_data.append([sent,requirements_candidates,results, document.sentence[0].token])
       #predict_data.append([sent,requirements_candidates,results])
     
-    
+    dist_limit = 3
+    rules = ('IN', 'TO', 'DT', 'VGB', 'PRP$', 'RP', 'RB', 'PDT', 'JJ')
     features_extracted=list()
     for predict in predict_data:
         iobAnt=-1
+        dist = 0
+        buff = ''
         featu=list()
         for (p, w) in zip(predict[2], predict[3]):
-        #for p in predict[2]:
-          #o,b,i=p[1]['confidences']
-          token=p[0]
-          iob=p[1]['iob']
+            token=p[0]
+            iob=p[1]['iob']
 
-          if iob!=-1 and iobAnt==-1:
-            featu.append(token)
-          elif (iob!=-1 or w.pos == 'DT' or w.pos == 'TO') and iobAnt!=-1:
-          #elif iob!=-1 and iobAnt!=-1:
-            #print(len(featu)-1, featu)
-            featu[len(featu)-1]= featu[len(featu)-1] +' '+token
-            iob = 1
-          iobAnt=iob
+            if iob!=-1 and iobAnt==-1:
+                if buff:
+                    buff += ' ' + token
+                    featu[len(featu)-1]= featu[len(featu)-1] +buff
+                    buff = ''
+                    dist = 0
+                else:
+                    featu.append(token)
+            elif iob != -1 and iobAnt!=-1:
+                featu[len(featu)-1]= featu[len(featu)-1] +' '+token
+                iob = 1
+            elif w.pos in rules and dist <= dist_limit and (iobAnt != -1 or buff):
+                dist += 1
+                buff += ' ' + token
+            else:
+                dist = 0
+                buff = ''
+
+            iobAnt=iob
         features_extracted.append((';'.join(featu)))
 
     f = open(opt.output_file, "w")
