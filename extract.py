@@ -221,29 +221,21 @@ def main():
     for predict in predict_data:
         iobAnt=-1
         dist = 0
-        buff = ''
         featu=list()
         for (p, w) in zip(predict[2], predict[3]):
             token=p[0]
             iob=p[1]['iob']
 
-            if iob!=-1 and iobAnt==-1:
-                if buff:
-                    buff += ' ' + token
-                    featu[len(featu)-1]= featu[len(featu)-1] +buff
-                    buff = ''
-                    dist = 0
-                else:
-                    featu.append(token)
-            elif iob != -1 and iobAnt!=-1:
+            if iob!=-1 and iobAnt==-1 and dist == 0:
+                featu.append(token)
+            elif iob != -1 and iobAnt != -1:
                 featu[len(featu)-1]= featu[len(featu)-1] +' '+token
                 iob = 1
-            elif dist <= dist_limit and (iobAnt != -1 or buff):
+            elif dist <= dist_limit and iobAnt != -1:
+                featu[len(featu)-1]= featu[len(featu)-1] +' '+token
                 dist += 1
-                buff += ' ' + token
             else:
                 dist = 0
-                buff = ''
 
             iobAnt=iob
         features_extracted.append((';'.join(featu)))
